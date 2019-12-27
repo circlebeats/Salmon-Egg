@@ -36,19 +36,25 @@ module.exports = async function (fastify) {
     });
     //GET SNIPCART DATA FROM DATABASE
     fastify.get('/snips', async (req,reply)=>{
-
         let [rows] = await connection.execute('SELECT title FROM trakz');
         let [rowsC] = await connection.execute('SELECT name,options,type FROM customFields');
-
-
-
-        reply.send({
-            name:`${rows[0].title}`,
-            url: `/`,
-            id: shortid.generate(),
-            price: 30.01,
-            customFields: rowsC
-        })
+        let row = [];
+        let i;
+        for (i = 0; i < rows.length; i++) {
+            let customFields = [{
+                name: rowsC[0].name,
+                options: rowsC[0].options,
+                type: rowsC[0].type}]
+            let newob = {
+                name: rows[i].title,
+                customFields,
+                id: shortid.generate(),
+                price: 30.01,
+                url: `/`,
+            };
+            row.push(newob)
+        }
+        reply.send(row);
     });
     //POST COMPLETED CONTACT US FORMS TO DATABASE
     fastify.post('/contact', (request,reply)=>{
